@@ -22,6 +22,8 @@
 
 #define OBS @[ kThemeBackgroundColor, kThemeFontColor ]
 
+static const CGFloat SSEmptySettingsSectionHeight = 1.0;
+
 @interface SSSettingsViewController ()
 
 @property (nonatomic, strong) SSSectionedDataSource *dataSource;
@@ -43,11 +45,12 @@
 @implementation SSSettingsViewController
 
 - (SSSettingsViewController *) init {
-    if( ( self = [self initWithStyle:UITableViewStyleGrouped] ) ) {
+    if( ( self = [self initWithStyle:UITableViewStylePlain] ) ) {
         self.title = NSLocalizedString(@"SETTINGS", @"Settings");
         self.clearsSelectionOnViewWillAppear = YES;
 
-        [SSThemes configureTable:self.tableView];
+        self.tableView.sectionHeaderTopPadding = 0;
+        [self applySettingsTheme];
 
         if( ![[UIDevice currentDevice] isIPad] ) {
             self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
@@ -62,7 +65,7 @@
                                 keyPath:key
                                 options:NSKeyValueObservingOptionNew
                                   block:^(SSSettingsViewController *vc, id object, NSDictionary *change) {
-                                      [SSThemes configureTable:vc.tableView];
+                                      [vc applySettingsTheme];
                                       [vc.tableView reloadData];
                                   }];
         }
@@ -74,6 +77,13 @@
     }
 
     return self;
+}
+
+- (void)applySettingsTheme {
+    UITableView *tableView = self.tableView;
+    [SSThemes configureTable:tableView];
+    tableView.tableFooterView = nil;
+    tableView.overrideUserInterfaceStyle = [[SSThemes sharedThemer] isUsingDarkTheme] ? UIUserInterfaceStyleDark : UIUserInterfaceStyleLight;
 }
 
 - (CGSize)preferredContentSize {
@@ -426,6 +436,34 @@
 }
 
 #pragma mark - UITableViewDelegate
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return [self.dataSource titleForHeaderInSection:section].length > 0 ? UITableViewAutomaticDimension : SSEmptySettingsSectionHeight;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return [self.dataSource titleForFooterInSection:section].length > 0 ? UITableViewAutomaticDimension : SSEmptySettingsSectionHeight;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
+    NSString *text = [self.dataSource titleForFooterInSection:section];
+    if (text.length == 0) {
+        return nil;
+    }
+
+    UIListContentConfiguration *content = [UIListContentConfiguration cellConfiguration];
+    content.text = text;
+    content.textProperties.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
+    content.textProperties.color = [UIColor secondaryLabelColor];
+    content.textProperties.numberOfLines = 0;
+
+    UITableViewHeaderFooterView *footer = [UITableViewHeaderFooterView new];
+    footer.contentConfiguration = content;
+    footer.isAccessibilityElement = YES;
+    footer.accessibilityLabel = text;
+    footer.accessibilityTraits = UIAccessibilityTraitStaticText;
+    return footer;
+}
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     UIViewController *nextVC = nil;

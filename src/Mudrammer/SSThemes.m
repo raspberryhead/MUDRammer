@@ -501,16 +501,18 @@
 #pragma mark - table configure
 
 + (void)configureTable:(UITableView *)tableView {
-    if (tableView.style == UITableViewStylePlain) {
-        tableView.backgroundColor = [[SSThemes sharedThemer] valueForThemeKey:kThemeBackgroundColor];
+    SSThemes *themer = [self sharedThemer];
+    tableView.backgroundColor = [themer valueForThemeKey:kThemeBackgroundColor];
 
+    if (tableView.style == UITableViewStylePlain) {
         if (![[UIDevice currentDevice] isIPad]) {
-            [tableView addCenteredFooterWithImage:([[self sharedThemer] isUsingDarkTheme]
+            [tableView addCenteredFooterWithImage:([themer isUsingDarkTheme]
                                                    ? [SPLImagesCatalog tildeWhiteImage]
                                                    : [SPLImagesCatalog tildeDarkImage])
                                             alpha:0.5f];
         }
     } else if (tableView.style == UITableViewStyleGrouped) {
+        tableView.overrideUserInterfaceStyle = [themer isUsingDarkTheme] ? UIUserInterfaceStyleDark : UIUserInterfaceStyleLight;
         tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
     }
 
