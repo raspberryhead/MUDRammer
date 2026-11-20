@@ -9,6 +9,19 @@
 #import "MRTestHelpers.h"
 #import "SSMUDSocket.h"
 
+@interface MRSocketTestSocket : GCDAsyncSocket
+@property (nonatomic) BOOL requestedBackgrounding;
+@end
+
+@implementation MRSocketTestSocket
+
+- (BOOL)enableBackgroundingOnSocket {
+    self.requestedBackgrounding = YES;
+    return NO;
+}
+
+@end
+
 @interface MRSocketTests : XCTestCase
 
 @end
@@ -16,14 +29,14 @@
 @implementation MRSocketTests
 {
     SSMUDSocket *sut;
-    GCDAsyncSocket *socket;
+    MRSocketTestSocket *socket;
     OCMockObject *mockSocketDelegate;
 }
 
 - (void)setUp {
     [super setUp];
 
-    socket = [GCDAsyncSocket new];
+    socket = [MRSocketTestSocket new];
     mockSocketDelegate = OCMProtocolMock(@protocol(SSMUDSocketDelegate));
     sut = [[SSMUDSocket alloc] initWithSocket:socket];
     sut.delegate = (id <SSMUDSocketDelegate>)mockSocketDelegate;
@@ -51,6 +64,7 @@
     [[mockSocketDelegate expect] mudsocketShouldAttemptSSL:sut];
 
     [sut socket:socket didConnectToHost:@"nanvaent.org" port:23];
+    XCTAssertFalse(socket.requestedBackgrounding);
     [sut socket:socket didReadData:[@"Hello" dataUsingEncoding:NSUTF8StringEncoding] withTag:0];
 
     [mockSocketDelegate verifyWithDelay:3];
