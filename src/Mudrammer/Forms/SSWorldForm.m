@@ -25,6 +25,7 @@ NSUInteger const kFormMaxInputLength = 1024;
 
 + (instancetype)formForWorld:(World *)world {
     SSWorldForm *form = [[SSWorldForm alloc] init];
+    form.grouped = NO;
     form.world = world;
     form.isNewWorld = [world.isHidden boolValue];
 

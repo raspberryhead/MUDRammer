@@ -30,6 +30,14 @@
   return self;
 }
 
+- (void)loadView {
+    [super loadView];
+
+    QuickDialogTableView *tableView = self.quickDialogTableView;
+    tableView.sectionHeaderTopPadding = 0;
+    tableView.overrideUserInterfaceStyle = [[SSThemes sharedThemer] isUsingDarkTheme] ? UIUserInterfaceStyleDark : UIUserInterfaceStyleLight;
+}
+
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 

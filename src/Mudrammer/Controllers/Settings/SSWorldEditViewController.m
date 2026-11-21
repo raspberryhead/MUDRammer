@@ -38,8 +38,6 @@
         editContext = context;
         currentWorld = world;
 
-        [SSThemes configureTable:self.quickDialogTableView];
-
         saveButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
                                                                    target:self
                                                                    action:@selector(saveWorld:)];
