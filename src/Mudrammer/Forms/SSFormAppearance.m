@@ -92,6 +92,21 @@
 {
     [super cell:cell willAppearForElement:element atIndexPath:path];
 
+    if ([element isKindOfClass:[QButtonElement class]]) {
+        UIColor *actionColor = element.enabled ? self.actionColorEnabled : self.actionColorDisabled;
+        cell.isAccessibilityElement = YES;
+        cell.accessibilityLabel = cell.textLabel.text;
+        cell.accessibilityTraits = UIAccessibilityTraitButton;
+        if (!element.enabled) {
+            cell.accessibilityTraits |= UIAccessibilityTraitNotEnabled;
+        }
+
+        cell.backgroundConfiguration = [self buttonBackgroundWithColor:actionColor highlighted:NO];
+        cell.configurationUpdateHandler = ^(UITableViewCell *buttonCell, UICellConfigurationState *state) {
+            buttonCell.backgroundConfiguration = [self buttonBackgroundWithColor:actionColor highlighted:state.highlighted];
+        };
+    }
+
     if ([cell isKindOfClass:[QEntryTableViewCell class]]) {
         QEntryTableViewCell *entryCell = (QEntryTableViewCell *)cell;
 
@@ -109,6 +124,16 @@
             [entryCell.textField setAttributedPlaceholder:attributedPlaceHolder];
         }
     }
+}
+
+- (UIBackgroundConfiguration *)buttonBackgroundWithColor:(UIColor *)color highlighted:(BOOL)highlighted {
+    UIBackgroundConfiguration *background = [UIBackgroundConfiguration clearConfiguration];
+    background.backgroundInsets = NSDirectionalEdgeInsetsMake(3.0, 16.0, 3.0, 16.0);
+    background.cornerRadius = 8.0;
+    background.strokeWidth = 1.0;
+    background.strokeColor = [color colorWithAlphaComponent:0.65];
+    background.backgroundColor = [color colorWithAlphaComponent:highlighted ? 0.20 : 0.06];
+    return background;
 }
 
 @end
